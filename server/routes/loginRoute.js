@@ -8,7 +8,6 @@ loginRoute.get("/", async (req, res) => {
         let userName = req.body.userName
         let password = req.body.password
         let user = await login(userName, password)
-        console.log(user);
         res.json(user)
     } catch (err) {
         res.statusMessage = err

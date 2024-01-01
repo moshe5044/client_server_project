@@ -26,7 +26,6 @@ async function deleteComment(activeUserId, commentId) {
         WHERE comments.id = ?
     `;
     const [[commentDetails]] = await pool.query(commentDetailsQuery, [commentId]);
-    //let postId = commentDetails.postId;
     let postUserId = commentDetails.postUserId;
 
     if (postUserId !== activeUserId) {
@@ -40,8 +39,22 @@ async function deleteComment(activeUserId, commentId) {
     return result;
 };
 
+async function deleteCommentsOfPost(postId) {
+    const deleteQuery = `
+        DELETE FROM comments
+        WHERE postId = ?
+    `
+    const [result] = await pool.query(deleteQuery, [postId]);
+    if (result.affectedRows > 0) {
+        return result;
+    } else {
+        throw new Error("comments not found or not deleted");
+    }
+}
+
 module.exports = {
     getComments,
     addComment,
-    deleteComment
+    deleteComment,
+    deleteCommentsOfPost
 };

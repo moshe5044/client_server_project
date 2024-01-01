@@ -13,7 +13,7 @@ async function login(userName, password) {
         WHERE userId = ? AND password = ?
     `;
         const [passwordData] = await pool.query(passwordQuery, [userId, password]);
-        console.log(passwordData);
+
         if (passwordData.length > 0) {
             return userData;
         }
@@ -22,7 +22,7 @@ async function login(userName, password) {
         }
     }
     else {
-        throw new Error("User not found"); // Throw an error if user is not found
+        throw new Error("User not found");
     }
 }
 module.exports = login
