@@ -11,6 +11,7 @@ const { deleteCommentsOfPost } = require("../db/comments")
 const postsRoute = express.Router();
 
 postsRoute.get("/", async (req, res) => {
+    console.log(req.headers.auth);
     try {
         const posts = await getPosts();
         res.json(posts);
@@ -75,21 +76,18 @@ postsRoute.patch("/updatePost/:userId", async (req, res) => {
     }
 })
 
-postsRoute.post("/deletePost/:userId", async (req, res) => {
+postsRoute.delete("/deletePost/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
         const postId = req.body.postId;
         const delPost = await deletePost(userId, postId)
         if (delPost) {
-            const delComments = await deleteCommentsOfPost(postId)
-            res.json({
-                post: delPost,
-                comment: delComments
-            })
+            res.json({ post: delPost })
         } else {
             res.status(500).json({ error: "Failed to delete post" });
         }
     } catch (err) {
+        console.log(err);
         if (err.message === "You do not have permission to delete this post") {
             res.status(403).json({ message: err.message });
         } else if (err.message === "post not found or not deleted") {

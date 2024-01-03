@@ -92,12 +92,10 @@ async function deletePost(activeUserId, postId) {
         DELETE FROM posts
         WHERE id = ?
     `;
-    console.log(sql);
     const [result] = await pool.query(sql, [postId])
-    console.log(result);
 
     if (result.affectedRows > 0) {
-        return result;
+        return [postDetails];
     } else {
         throw new Error("post not found or not deleted");
     }

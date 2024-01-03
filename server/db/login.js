@@ -26,5 +26,3 @@ async function login(userName, password) {
     }
 }
 module.exports = login
-
-// login("Bret", "hildegard.org");

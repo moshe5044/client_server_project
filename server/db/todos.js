@@ -9,7 +9,7 @@ async function getTodos(userId) {
     if (data.length > 0) {
         return data;
     } else {
-        throw new Error("please provide the correct user id");
+        throw new Error("User does not exist");
     }
 };
 
@@ -61,7 +61,6 @@ async function updateTitle(userId, todoId, title) {
         WHERE id = ?;
     `;
     const [ownerCheckResult] = await pool.query(ownerCheckQuery, [todoId]);
-
     if (ownerCheckResult.length === 0 || ownerCheckResult[0].userId !== userId) {
         throw new Error("You do not have permission to update this todo");
     }
@@ -70,7 +69,7 @@ async function updateTitle(userId, todoId, title) {
         SET title = ?
         WHERE id = ?
     `
-    const [update] = await pool.query(sql, [title, id])
+    const [update] = await pool.query(sql, [title, todoId])
     if (update.affectedRows > 0) {
         return update;
     } else {
@@ -80,10 +79,12 @@ async function updateTitle(userId, todoId, title) {
 
 async function updateCompleted(userId, todoId) {
     const ownerCheckQuery = `
-        SELECT userId FROM todos WHERE id = ?;
+        SELECT userId 
+        FROM todos 
+        WHERE id = ?;
     `;
     const [ownerCheckResult] = await pool.query(ownerCheckQuery, [todoId]);
-    if (ownerCheckResult[0].userId !== userId) {
+    if (ownerCheckResult[0].userId !== Number(userId)) {
         throw new Error("You do not have permission to update this todo");
     }
     
