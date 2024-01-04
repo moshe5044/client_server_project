@@ -102,7 +102,7 @@ async function updateCompleted(userId, todoId) {
     } else {
         throw new Error("Todo not found or completed unchanged")
     }
-};
+}; 
 
 async function deleteTodo(userId, todoId) {
     const ownerCheckQuery = `

@@ -7,20 +7,20 @@ const {
     updatePost,
     deletePost
 } = require("../db/posts")
-const { handleWrongId, 
-    updateCompletedAndDeleteVal, 
-    addPostVal, 
+const { handleWrongId,
+    updateCompletedAndDeleteVal,
+    addPostVal,
     updatePostVal,
 } = require("./validations/validation")
 
-const postsRoute = express.Router();
+const postsRoute = express.Router(); 
 
 postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const posts = await getPosts();
         res.json(posts);
-    } catch (err) {
-        if (err.message === "No posts found") {
+    } catch (err) { 
+        if (err.message === "No posts found") { 
             res.status(404).json(err.message);
         } else {
             res.status(500).json({ error: "Internal server message" });
@@ -28,7 +28,7 @@ postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     }
 })
 
-postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
+postsRoute.get("/getPostsOf/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const correntUser = req.params.userId;
         const posts = await getPostsByUser(correntUser)
@@ -102,4 +102,4 @@ postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateComp
     }
 })
 
-module.exports = postsRoute;
+module.exports = postsRoute; 

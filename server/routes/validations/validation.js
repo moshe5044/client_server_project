@@ -2,7 +2,7 @@ const express = require("express");
 const joi = require("joi");
 
 function handleWrongId(req, res, next) {                      //getTodos, getCompletedTodos, getUnCompletedTodos, getPosts, getPostByUser, getComments
-    const idSchema = joi.number().min(1).required();
+    const idSchema = joi.number().min(1).max(10).positive().integer().required();
     const { error } = idSchema.validate(req.params.userId);
     if (error) {
         res.status(400).send(error.details[0].message);
@@ -21,7 +21,7 @@ function addTodoValidation(req, res, next) {                 //addTodo
         return;
     }
     next();
-}
+} 
 
 function updateCompletedAndDeleteVal(req, res, next) {          //updateCompleted, delete in todos posts and comments
     const itemSchema = joi.object({
@@ -38,7 +38,7 @@ function updateCompletedAndDeleteVal(req, res, next) {          //updateComplete
 function updateTitleVal(req, res, next) {
     const bodySchema = joi.object({
         todoId: joi.number().min(1).positive().required(),
-        title: joi.string.min(1).require()
+        title: joi.string().min(1).required()
     });
     const { error } = bodySchema.validate(req.body);
     if (error) {
