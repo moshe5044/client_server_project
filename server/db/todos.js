@@ -61,7 +61,7 @@ async function updateTitle(userId, todoId, title) {
         WHERE id = ?;
     `;
     const [ownerCheckResult] = await pool.query(ownerCheckQuery, [todoId]);
-    if (ownerCheckResult.length === 0 || ownerCheckResult[0].userId !== userId) {
+    if (ownerCheckResult.length === 0 || ownerCheckResult[0].userId !== Number(userId)) {
         throw new Error("You do not have permission to update this todo");
     }
     const sql = `
@@ -111,7 +111,7 @@ async function deleteTodo(userId, todoId) {
         WHERE id = ?;
     `;
     const [ownerCheckResult] = await pool.query(ownerCheckQuery, [todoId]);
-    if (ownerCheckResult[0].userId !== userId) {
+    if (ownerCheckResult[0].userId !== Number(userId)) {
         throw new Error("You do not have permission to delete this todo");
     }
     const deleteQuery = `

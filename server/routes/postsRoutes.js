@@ -1,4 +1,5 @@
 const express = require("express");
+const authenticate = require("../routes/validations/authentication")
 const {
     getPosts,
     getPostsByUser,
@@ -6,12 +7,15 @@ const {
     updatePost,
     deletePost
 } = require("../db/posts")
-const { deleteCommentsOfPost } = require("../db/comments")
+const { handleWrongId, 
+    updateCompletedAndDeleteVal, 
+    addPostVal, 
+    updatePostVal,
+} = require("./validations/validation")
 
 const postsRoute = express.Router();
 
-postsRoute.get("/", async (req, res) => {
-    console.log(req.headers.auth);
+postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const posts = await getPosts();
         res.json(posts);
@@ -24,7 +28,7 @@ postsRoute.get("/", async (req, res) => {
     }
 })
 
-postsRoute.get("/:userId", async (req, res) => {
+postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const correntUser = req.params.userId;
         const posts = await getPostsByUser(correntUser)
@@ -38,7 +42,7 @@ postsRoute.get("/:userId", async (req, res) => {
     }
 })
 
-postsRoute.post("/addPost/:userId", async (req, res) => {
+postsRoute.post("/addPost/:userId", authenticate, handleWrongId, addPostVal, async (req, res) => {
     try {
         const userId = req.params.userId;
         const title = req.body.title;
@@ -56,12 +60,12 @@ postsRoute.post("/addPost/:userId", async (req, res) => {
     }
 })
 
-postsRoute.patch("/updatePost/:userId", async (req, res) => {
+postsRoute.patch("/updatePost/:userId", authenticate, handleWrongId, updatePostVal, async (req, res) => {
     try {
         const userId = req.params.userId
         const postId = req.body.postId
         const newTitle = req.body.title
-        const newBody = req.body.body
+        const newBody = req.body.postBody
         const update = await updatePost(userId, postId, newTitle, newBody)
         res.json(update)
     } catch (err) {
@@ -76,11 +80,11 @@ postsRoute.patch("/updatePost/:userId", async (req, res) => {
     }
 })
 
-postsRoute.delete("/deletePost/:userId", async (req, res) => {
+postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
         const userId = req.params.userId;
-        const postId = req.body.postId;
-        const delPost = await deletePost(userId, postId)
+        const itemId = req.body.itemId;
+        const delPost = await deletePost(userId, itemId)
         if (delPost) {
             res.json({ post: delPost })
         } else {

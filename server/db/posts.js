@@ -3,7 +3,7 @@ const pool = require('./pool')
 async function getPosts() {
     const postsQuery = `
         SELECT * FROM posts
-    `
+    `;
     const [data] = await pool.query(postsQuery);
     if (data.length > 0) {
         return data;

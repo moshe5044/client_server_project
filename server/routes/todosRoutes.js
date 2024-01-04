@@ -1,5 +1,6 @@
 const express = require("express");
 const pool = require("../db/pool")
+const authenticate = require("../routes/validations/authentication")
 const { getTodos,
     getCompletedTodos,
     getUnCompletedTodos,
@@ -8,22 +9,16 @@ const { getTodos,
     updateCompleted,
     deleteTodo
 } = require("../db/todos");
-const login = require("../db/login");
+const { handleWrongId, 
+    addTodoValidation, 
+    updateCompletedAndDeleteVal,
+    updateTitleVal
+} = require("./validations/validation")
 
 const todosRoute = express.Router();
-async function authenticate(req, res, next) {
-    const auth = req.headers.auth;
-    const [providedUserName, providedPassword] = auth.split(":");
-    try {
-        const user = await login(providedUserName, providedPassword)
-        req.user = user;
-        next();
-    } catch (err) {
-        res.status(401).send()  
-    }
-} 
 
-todosRoute.get("/:userId", authenticate, async (req, res) => {
+
+todosRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const correntUser = req.params.userId;
         if (req.user.id !== Number(correntUser)) {
@@ -44,7 +39,7 @@ todosRoute.get("/:userId", authenticate, async (req, res) => {
     }
 });
 
-todosRoute.get("/completed/:userId", async (req, res) => {
+todosRoute.get("/completed/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const userId = req.params.userId;
         const completedTodos = await getCompletedTodos(userId);
@@ -55,7 +50,7 @@ todosRoute.get("/completed/:userId", async (req, res) => {
     }
 });
 
-todosRoute.get("/unCompleted/:userId", async (req, res) => {
+todosRoute.get("/unCompleted/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const userId = req.params.userId;
         const unCompletedTodos = await getUnCompletedTodos(userId);
@@ -67,13 +62,14 @@ todosRoute.get("/unCompleted/:userId", async (req, res) => {
 
 });
 
-todosRoute.post("/addTodo", async (req, res) => {
+todosRoute.post("/addTodo/:userId", authenticate, handleWrongId, addTodoValidation, async (req, res) => {
     try {
-        const userId = req.body.userId;
+        const userId = req.params.userId;
         const title = req.body.title;
         const add = await addTodo(userId, title);
         res.json(add);
     } catch (err) {
+        console.log(err);
         if (err.message === "add failed! check the details and try again") {
             res.status(400).json({ message: err.message });
         } else {
@@ -83,14 +79,15 @@ todosRoute.post("/addTodo", async (req, res) => {
     }
 });
 
-todosRoute.patch("/updateTitle", async (req, res) => {
+todosRoute.patch("/updateTitle/:userId", authenticate, handleWrongId, updateTitleVal, async (req, res) => {
     try {
-        const userId = req.body.userId
+        const userId = req.params.userId
         const todoId = req.body.todoId
         const title = req.body.title
         const update = await updateTitle(userId, todoId, title)
         res.json(update)
     } catch (err) {
+        console.log(err);
         if (err.message === "Todo not found or title unchanged") {
             res.status(404).json({ error: err.message })
         }
@@ -102,13 +99,14 @@ todosRoute.patch("/updateTitle", async (req, res) => {
     }
 });
 
-todosRoute.patch("/updateCompleted/:userId", async (req, res) => {
+todosRoute.patch("/updateCompleted/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
         const userId = req.params.userId
-        const todoId = req.body.todoId;
-        const update = await updateCompleted(userId, todoId);
+        const itemId = req.body.itemId;
+        const update = await updateCompleted(userId, itemId);
         res.json(update);
     } catch (err) {
+        console.log(err);
         if (err.message === "Todo not found or completed unchanged") {
             res.status(404).json(err.message);
         } else if (err.message === "You do not have permission to update this todo") {
@@ -119,11 +117,11 @@ todosRoute.patch("/updateCompleted/:userId", async (req, res) => {
     }
 });
 
-todosRoute.delete("/deleteTodo/:todoId", async (req, res) => {
+todosRoute.delete("/deleteTodo/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
-        const userId = req.body.userId;
-        const todoId = req.params.todoId;
-        const delTodo = await deleteTodo(userId, todoId);
+        const userId = req.params.userId;
+        const itemId = req.body.itemId;
+        const delTodo = await deleteTodo(userId, itemId);
         res.json(delTodo);
     } catch (err) {
         if (err.message === "You do not have permission to delete this todo") {

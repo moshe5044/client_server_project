@@ -1,12 +1,16 @@
 const pool = require('./pool');
 
 async function getComments(postId) {
-    const getCommentsQuery = `
+    const commentsQuery = `
         SELECT * FROM comments
         WHERE postId = ?
     `;
-    const [result] = await pool.query(getCommentsQuery, [postId])
-    return result;
+    const [result] = await pool.query(commentsQuery, [postId])
+    if (result.affectedRows > 0) {
+        return result;
+    } else {
+        throw new Error("No comments found");
+    }
 };
 
 async function addComment(postId, name, email, body) {
@@ -15,7 +19,11 @@ async function addComment(postId, name, email, body) {
     VALUES (?, ?, ?, ?)
     `;
     const [data] = await pool.query(sql, [postId, name, email, body])
-    return data;
+    if (data.affectedRows > 0) {
+        return data;
+    } else {
+        throw new Error('add failed! check the details and try again');
+    }
 };
 
 async function deleteComment(activeUserId, commentId) {
@@ -36,7 +44,11 @@ async function deleteComment(activeUserId, commentId) {
         WHERE id = ?
     `;
     const [result] = await pool.query(deleteQuery, [commentId]);
-    return result;
+    if (result.affectedRows > 0) {
+        return result;
+    } else {
+        throw new Error("comment not found or not deleted");
+    }
 };
 
 module.exports = {
