@@ -17,16 +17,19 @@ const postsRoute = express.Router();
 
 postsRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
-        const posts = await getPosts();
+        if (req.user.id !== Number(req.params.userId)) {
+            return res.status(403).send("no access!")
+        }
+        const posts = await getPosts(); 
         res.json(posts);
     } catch (err) { 
-        if (err.message === "No posts found") { 
+        if (err.message === "No posts found") {  
             res.status(404).json(err.message);
         } else {
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 postsRoute.get("/getPostsOf/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
@@ -40,29 +43,35 @@ postsRoute.get("/getPostsOf/:userId", authenticate, handleWrongId, async (req, r
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 postsRoute.post("/addPost/:userId", authenticate, handleWrongId, addPostVal, async (req, res) => {
     try {
+        if (req.user.id !== Number(req.params.userId)) {
+            return res.status(403).send("no access!")
+        }
         const userId = req.params.userId;
         const title = req.body.title;
         const postBody = req.body.postBody;
         const add = await addPost(userId, title, postBody);
-        res.json(add);
+        res.status(201).json(add);
     } catch (err) {
         if (err.message === "User not found. Please provide a valid userId.") {
-            res.status(400).json(err.message);
+            res.status(404).json(err.message);
         } else if (err.message === "add failed! check the details and try again") {
             res.status(400).json(err.message);
         } else {
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 postsRoute.patch("/updatePost/:userId", authenticate, handleWrongId, updatePostVal, async (req, res) => {
     try {
-        const userId = req.params.userId
+        if (req.user.id !== Number(req.params.userId)) {
+            return res.status(403).send("no access!")
+        }
+        const userId = req.params.userId 
         const postId = req.body.postId
         const newTitle = req.body.title
         const newBody = req.body.postBody
@@ -78,10 +87,13 @@ postsRoute.patch("/updatePost/:userId", authenticate, handleWrongId, updatePostV
             res.status(500).json({ error: "Internal server error" })
         }
     }
-})
+})//
 
 postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
+        if (req.user.id !== Number(req.params.userId)) {
+            return res.status(403).send("no access!")
+        }
         const userId = req.params.userId;
         const itemId = req.body.itemId;
         const delPost = await deletePost(userId, itemId)
@@ -91,7 +103,6 @@ postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateComp
             res.status(500).json({ error: "Failed to delete post" });
         }
     } catch (err) {
-        console.log(err);
         if (err.message === "You do not have permission to delete this post") {
             res.status(403).json({ message: err.message });
         } else if (err.message === "post not found or not deleted") {
@@ -100,6 +111,6 @@ postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateComp
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 module.exports = postsRoute; 

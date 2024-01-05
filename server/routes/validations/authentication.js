@@ -8,9 +8,9 @@ async function authenticate(req, res, next) {
         const user = await login(providedUserName, providedPassword)
         req.user = user; 
         next();
-    } catch (err) {
-        res.status(401).send()  
+    } catch (err) { 
+        res.status(401).send()   
     }
 } 
 
-module.exports = authenticate
+module.exports = authenticate 

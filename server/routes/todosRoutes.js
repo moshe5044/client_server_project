@@ -22,7 +22,7 @@ todosRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
         const correntUser = req.params.userId;
         if (req.user.id !== Number(correntUser)) {
-            throw new Error("You do not have permission to access this user");
+            res.send("no access!")
         }
         const todos = await getTodos(correntUser);
         res.json(todos);
@@ -37,7 +37,7 @@ todosRoute.get("/:userId", authenticate, handleWrongId, async (req, res) => {
             res.status(500).json({ error: "Internal server error" });
         }
     }
-});
+});//
 
 todosRoute.get("/completed/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
@@ -48,10 +48,13 @@ todosRoute.get("/completed/:userId", authenticate, handleWrongId, async (req, re
         res.statusMessage = err
         res.status(500).send()
     }
-});
+});//
 
 todosRoute.get("/unCompleted/:userId", authenticate, handleWrongId, async (req, res) => {
     try {
+        if (req.user.id !== Number(req.params.userId)) {
+            res.send("no access!")
+        }
         const userId = req.params.userId;
         const unCompletedTodos = await getUnCompletedTodos(userId);
         res.json(unCompletedTodos)
@@ -60,24 +63,26 @@ todosRoute.get("/unCompleted/:userId", authenticate, handleWrongId, async (req, 
         res.status(500).send()
     }
 
-});
+});//
 
 todosRoute.post("/addTodo/:userId", authenticate, handleWrongId, addTodoValidation, async (req, res) => {
     try {
+        if (req.user.id !== Number(req.params.userId)) {
+            res.send("no access!")
+        }
         const userId = req.params.userId;
         const title = req.body.title;
         const add = await addTodo(userId, title);
-        res.json(add);
+        res.status(201).json(add);
     } catch (err) {
-        console.log(err);
         if (err.message === "add failed! check the details and try again") {
             res.status(400).json({ message: err.message });
         } else {
             res.statusMessage = err
-            res.status(500).send()
+            res.status(500).send() 
         }
     }
-});
+});//
 
 todosRoute.patch("/updateTitle/:userId", authenticate, handleWrongId, updateTitleVal, async (req, res) => {
     try {
@@ -87,7 +92,6 @@ todosRoute.patch("/updateTitle/:userId", authenticate, handleWrongId, updateTitl
         const update = await updateTitle(userId, todoId, title)
         res.json(update)
     } catch (err) {
-        console.log(err);
         if (err.message === "Todo not found or title unchanged") {
             res.status(404).json({ error: err.message })
         }
@@ -97,16 +101,15 @@ todosRoute.patch("/updateTitle/:userId", authenticate, handleWrongId, updateTitl
             res.status(500).json({ error: "Internal server error" })
         }
     }
-});
+});//
 
 todosRoute.patch("/updateCompleted/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
         const userId = req.params.userId
-        const itemId = req.body.itemId;
+        const itemId = req.body.itemId; 
         const update = await updateCompleted(userId, itemId);
-        res.json(update);
-    } catch (err) {
-        console.log(err);
+        res.json(update); 
+    } catch (err) { 
         if (err.message === "Todo not found or completed unchanged") {
             res.status(404).json(err.message);
         } else if (err.message === "You do not have permission to update this todo") {
@@ -115,7 +118,7 @@ todosRoute.patch("/updateCompleted/:userId", authenticate, handleWrongId, update
             res.status(500).json({ error: "Internal server message" });
         }
     }
-});
+});//
 
 todosRoute.delete("/deleteTodo/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
@@ -132,6 +135,6 @@ todosRoute.delete("/deleteTodo/:userId", authenticate, handleWrongId, updateComp
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 module.exports = todosRoute;

@@ -6,7 +6,7 @@ async function getComments(postId) {
         WHERE postId = ?
     `;
     const [result] = await pool.query(commentsQuery, [postId])
-    if (result.affectedRows > 0) {
+    if (result.length > 0) {
         return result;
     } else {
         throw new Error("No comments found");
@@ -36,7 +36,7 @@ async function deleteComment(activeUserId, commentId) {
     const [[commentDetails]] = await pool.query(commentDetailsQuery, [commentId]);
     let postUserId = commentDetails.postUserId;
 
-    if (postUserId !== activeUserId) {
+    if (postUserId !== Number(activeUserId)) {
         throw new Error('You do not have permission to delete this comment');
     }
     const deleteQuery = `

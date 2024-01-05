@@ -14,10 +14,10 @@ const { handleWrongId,
 const commentsRoute = express.Router();
 
 
-commentsRoute.get("/:postId", handleWrongPostId, async (req, res) => {
+commentsRoute.get("/:postId", authenticate, handleWrongPostId, async (req, res) => {
     try {
         const postId = req.params.postId
-        const comments = await getComments(postId);
+        const comments = await getComments(postId); 
         res.json(comments);
     } catch (err) {
         if (err.message === "No comments found") {
@@ -25,17 +25,17 @@ commentsRoute.get("/:postId", handleWrongPostId, async (req, res) => {
         } else {
             res.status(500).send({ error: "Internal server message" });
         }
-    }
-})
+    } 
+})//
 
-commentsRoute.post("/addComment/:postId", handleWrongPostId, addCommentVal, async (req, res) => {
+commentsRoute.post("/addComment/:postId", authenticate, handleWrongPostId, addCommentVal, async (req, res) => {
     try {
         const postId = req.params.postId;
         const name = req.body.name;
         const email = req.body.email;
         const commentBody = req.body.commentBody;
         const add = await addComment(postId, name, email, commentBody);
-        res.json(add)
+        res.status(201).json(add)
     } catch (err) {
         if (err.message === "add failed! check the details and try again") {
             res.status(400).json(err.message);
@@ -43,9 +43,9 @@ commentsRoute.post("/addComment/:postId", handleWrongPostId, addCommentVal, asyn
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
-commentsRoute.delete("/delete/:userId", handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
+commentsRoute.delete("/delete/:userId", authenticate, handleWrongId, updateCompletedAndDeleteVal, async (req, res) => {
     try {
         const userId = req.params.userId;
         const itemId = req.body.itemId;
@@ -60,6 +60,6 @@ commentsRoute.delete("/delete/:userId", handleWrongId, updateCompletedAndDeleteV
             res.status(500).json({ error: "Internal server message" });
         }
     }
-})
+})//
 
 module.exports = commentsRoute;

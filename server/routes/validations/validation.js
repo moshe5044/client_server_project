@@ -50,7 +50,7 @@ function updateTitleVal(req, res, next) {
 
 function addPostVal(req, res, next) {
     const addPostSchema = joi.object({
-        title: joi.string.min(1).require(),
+        title: joi.string().min(1).required(),
         postBody: joi.string().min(1).required()
     });
     const { error } = addPostSchema.validate(req.body);
@@ -64,7 +64,7 @@ function addPostVal(req, res, next) {
 function updatePostVal(req, res, next) {
     const updatePostSchema = joi.object({
         postId: joi.number().min(1).positive().required(),
-        title: joi.string.min(1).require(),
+        title: joi.string().min(1).required(),
         postBody: joi.string().min(1).required()
     });
     const { error } = updatePostSchema.validate(req.body);
@@ -76,8 +76,9 @@ function updatePostVal(req, res, next) {
 }
 
 function handleWrongPostId(req, res, next) {
-    const postIdSchema = joi.number().min(1).required();
-    const { error } = postIdSchema.validate(req.params.userId);
+    console.log(req.params.postId);
+    const postIdSchema = joi.number().min(1).positive().required();
+    const { error } = postIdSchema.validate(req.params.postId);
     if (error) {
         res.status(400).send(error.details[0].message);
         return;
@@ -87,8 +88,7 @@ function handleWrongPostId(req, res, next) {
 
 function addCommentVal(req, res, next) {
     const addCommentSchema = joi.object({
-        postId: joi.number().min(1).positive().required(),
-        name: joi.string.min(1).require(),
+        name: joi.string().min(1).required(),
         email: joi.string().email().required(),
         commentBody: joi.string().min(1).required()
     });

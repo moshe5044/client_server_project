@@ -83,6 +83,9 @@ async function deletePost(activeUserId, postId) {
     `;
 
     const [postDetails] = await pool.query(postDetailsQuery, [postId])
+    if (postDetails.length === 0) {
+        throw new Error("post not found or not deleted");
+    }
     const postUserId = postDetails[0].userId;
     if (postUserId !== Number(activeUserId)) {
         throw new Error('You do not have permission to delete this post');
