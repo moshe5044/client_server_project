@@ -103,6 +103,7 @@ postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateComp
             res.status(500).json({ error: "Failed to delete post" });
         }
     } catch (err) {
+        console.log(err);
         if (err.message === "You do not have permission to delete this post") {
             res.status(403).json({ message: err.message });
         } else if (err.message === "post not found or not deleted") {
@@ -113,4 +114,4 @@ postsRoute.delete("/deletePost/:userId", authenticate, handleWrongId, updateComp
     }
 })//
 
-module.exports = postsRoute; 
+module.exports = postsRoute;  

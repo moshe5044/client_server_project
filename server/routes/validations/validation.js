@@ -1,4 +1,3 @@
-const express = require("express");
 const joi = require("joi");
 
 function handleWrongId(req, res, next) {                      //getTodos, getCompletedTodos, getUnCompletedTodos, getPosts, getPostByUser, getComments
@@ -23,7 +22,7 @@ function addTodoValidation(req, res, next) {                 //addTodo
     next();
 } 
 
-function updateCompletedAndDeleteVal(req, res, next) {          //updateCompleted, delete in todos posts and comments
+function updateCompletedAndDeleteVal(req, res, next) {       //updateCompleted, delete in todos posts and comments
     const itemSchema = joi.object({
         itemId: joi.number().min(1).positive().required()
     });
@@ -76,7 +75,6 @@ function updatePostVal(req, res, next) {
 }
 
 function handleWrongPostId(req, res, next) {
-    console.log(req.params.postId);
     const postIdSchema = joi.number().min(1).positive().required();
     const { error } = postIdSchema.validate(req.params.postId);
     if (error) {
